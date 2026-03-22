@@ -1,5 +1,37 @@
 #include "EmotionEngine.h"
 
+EmotionEngine::EmotionEngine() : thresholds_(defaultEmotionThresholds()) {}
+
+void EmotionEngine::setThresholds(const EmotionThresholds& thresholds) {
+  if (isValidEmotionThresholds(thresholds)) {
+    thresholds_ = thresholds;
+  }
+}
+
+const EmotionThresholds& EmotionEngine::thresholds() const {
+  return thresholds_;
+}
+
+VisualState EmotionEngine::stateFromReadings(const PlantReadings& readings) const {
+  if (readings.moisturePct < thresholds_.dryMoistureMax) {
+    return VisualState::Dry;
+  }
+
+  if (readings.lightPct < thresholds_.lowLightMax) {
+    return VisualState::LowLight;
+  }
+
+  if (readings.moisturePct >= thresholds_.goodMoistureMin + 15.0f) {
+    return VisualState::Excellent;
+  }
+
+  if (readings.moisturePct >= thresholds_.goodMoistureMin) {
+    return VisualState::Good;
+  }
+
+  return VisualState::Okay;
+}
+
 VisualState EmotionEngine::stateFromDemo(uint32_t tMillis) const {
   const uint32_t cycle = tMillis % 15000;
 
